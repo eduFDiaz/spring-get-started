@@ -57,7 +57,7 @@ public class HelloController {
 
 Click on [localhost:8080/hello](https://localhost:8080/hello) to see the magic happening.
 
-![alt](https://github.com/eduFDiaz/spring-get-started/raw/master/images/browser-hello.jpg)
+![alt](images/browser-hello.jpg)
 
 create a topic class as it follows:
 ```
@@ -114,4 +114,60 @@ modify the getAllTopics() method in the controller:
 ```
 visit the url and spring again does the magic for you:
 
-![alt](https://github.com/eduFDiaz/spring-get-started/raw/master/images/topic-controller-Get-all-topics.jpg)
+![alt](images/topic-controller-Get-all-topics.jpg)
+
+## Creating a service
+
+Create a service and move the list of topics to it
+```
+package com.codingindfw.springbootstarter.topic;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class TopicService {
+	private List<Topic> topics = Arrays.asList(
+			new Topic(1, "java", "intro to java"),
+			new Topic(2, "spring", "intro to spring"),
+			new Topic(3, "asp", "intro to asp.net"),
+			new Topic(4, "swagger", "intro to swagger")
+		);
+	
+	public List<Topic> getAllTopics(){
+		return this.topics;
+	} 
+}
+
+```
+Then spring will inject the server into our controller if we rewrite the controller as it follows:
+```
+package com.codingindfw.springbootstarter.topic;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class TopicController {
+	
+	@Autowired
+	private TopicService topicService;
+	
+	@RequestMapping("/topics")
+	public List<Topic> getAllTopics() {
+		
+		return topicService.getAllTopics(); 
+	}
+}
+
+```
+
+The output when visiting the url will be the same
+
+![alt](images/topic-controller-Get-all-topics.jpg)
