@@ -221,3 +221,40 @@ public Topic addTopic(Topic topic){
 ```
 Sent a json object into the body to the api using the POST verb:
 ![alt](images/topic-controller-add-topic.jpg)
+
+## Update and delete an item
+
+Define the method in the controller:
+```
+@RequestMapping(method=RequestMethod.PUT, value="/topics/{id}")
+public Topic updateTopic(@PathVariable int id,@RequestBody Topic topic) {
+	return topicService.updateTopic(id, topic); 
+}
+```
+Define the method in the service:
+```
+public Topic updateTopic(int id, Topic topic) {
+	int index = this.topics.indexOf(this.topics.stream().filter(t -> new Integer(t.getId()).equals(id)).findFirst().get());
+	this.topics.set(index, topic);
+	return this.topics.get(index);
+}
+```
+Make the request using your favorite rest client:
+
+![alt](images/topic-controller-update-topic-by-id.jpg)
+
+The delete method follows a similar approach:
+```
+@RequestMapping(method=RequestMethod.DELETE, value="/topics/{id}")
+public void updateTopic(@PathVariable int id) {
+	topicService.deleteTopic(id); 
+}
+```
+In the service:
+```
+public void deleteTopic(int id) {
+	int index = this.topics.indexOf(this.topics.stream().filter(t -> new Integer(t.getId()).equals(id)).findFirst().get());
+	this.topics.remove(index);
+}
+```
+![alt](images/topic-controller-delete-topic-by-id.jpg)
