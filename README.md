@@ -171,3 +171,53 @@ public class TopicController {
 The output when visiting the url will be the same
 
 ![alt](images/topic-controller-Get-all-topics.jpg)
+
+## Request an item from the collection
+
+Define a method in the controller. Note the use of @PathVariable to map that part of the url to our ```int``` id.
+```
+.....
+@RequestMapping("/topics/{id}")
+public Topic getTopic(@PathVariable int id) {
+	return topicService.getTopic(id); 
+}
+```
+Define a method in the server as it follows:
+```
+...
+public Topic getTopic(int id){
+	return this.topics.stream().filter(t -> new Integer(t.getId()).equals(id)).findFirst().get();
+}
+```
+![alt](images/topic-controller-Get-topic-by-id.jpg)
+
+## Adding an item to the collection
+
+Define a method in the controller. Use ```@RequestBody``` to get the body as json
+
+```
+@RequestMapping(method=RequestMethod.POST, value="/topics")
+public Topic addTopic(@RequestBody Topic topic) {
+	return topicService.addTopic(topic); 
+}
+```
+Change the list to a mutable object.
+```
+private List<Topic> topics = new ArrayList<>(
+			Arrays.asList(
+						new Topic(1, "java", "intro to java"),
+						new Topic(2, "spring", "intro to spring"),
+						new Topic(3, "asp", "intro to asp.net"),
+						new Topic(4, "swagger", "intro to swagger")
+					)
+			);
+```
+create a method in the service:
+```
+public Topic addTopic(Topic topic){
+	this.topics.add(topic);
+	return topic;
+}
+```
+Sent a json object into the body to the api using the POST verb:
+![alt](images/topic-controller-add-topic.jpg)
