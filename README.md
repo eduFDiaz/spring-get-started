@@ -258,3 +258,126 @@ public void deleteTopic(int id) {
 }
 ```
 ![alt](images/topic-controller-delete-topic-by-id.jpg)
+
+Change the port creating a file named ```application.properties``` 
+and writing ```server.port=5000``` into it. Consult the [documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html#security-properties) for more properties.
+
+You can add a method to the service to filter entities by field making sure the spring convention is respected. Will start find ```find``` then the ```ClassName``` followed by ```By```, and at the end the field you want to filter upon ```Field```. In the next example the method will filter Topics by Name: 
+```
+public List<Topic> findTopicByName();
+```
+> Make sure to use camel case when naming these methods.
+
+## Relationships
+Declare ```many to many``` relationships using the @ManyToMany decorator on top of the field that points to another class. Ex:
+```
+@Entity
+@Table(name = "posts")
+public class Post {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @NotNull
+    @Size(max = 100)
+    @Column(unique = true)
+    private String title;
+
+    @NotNull
+    @Size(max = 250)
+    private String description;
+
+    @NotNull
+    @Lob
+    private String content;
+
+
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = {
+                CascadeType.PERSIST,
+                CascadeType.MERGE
+            })
+    @JoinTable(name = "post_tags",
+            joinColumns = { @JoinColumn(name = "post_id") },
+            inverseJoinColumns = { @JoinColumn(name = "tag_id") })
+    private Set<Tag> tags = new HashSet<>();
+
+
+    public Post() {
+
+    }
+
+    public Post(String title, String description, String content) {
+        this.title = title;
+        this.description = description;
+        this.content = content;
+    }
+
+    // Getters and Setters (Omitted for brevity)
+}
+```
+Now the tags ```Entity```:
+
+```
+@Entity
+@Table(name = "tags")
+public class Tag {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @NotNull
+    @Size(max = 100)
+    @NaturalId
+    private String name;
+
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = {
+                CascadeType.PERSIST,
+                CascadeType.MERGE
+            },
+            mappedBy = "tags")
+    private Set<Post> posts = new HashSet<>();
+
+    public Tag() {
+
+    }
+
+    public Tag(String name) {
+        this.name = name;
+    }
+
+    // Getters and Setters (Omitted for brevity)
+}
+```
+> SNotice how the ```many to many``` decorator is used in both tables. More details at this excellent tutorial [JPA / Hibernate / MySQL Many to Many Mapping Example with Spring Boot](https://www.callicoder.com/hibernate-spring-boot-jpa-many-to-many-mapping-example/)
+
+A similar approach is followed for ```many to one``` relationship.
+
+## Deployment
+To create a self contained jar file of the project, run:
+```
+~/spring-boot-project $ mvn clean install
+```
+![alt](images/install.jpg)
+
+Then, to run the service  java -jar target/course-api-0.0.1-SNAPSHOT.jar
+
+![alt](images/run.jpg)
+
+## Adding actuator
+Go to the pom.xml and add the actuator dependency:
+
+![alt](images/actuator-dependency.jpg)
+
+It will make add ```/health``` endpoint to your app where you can see some common stats of your app:
+
+![alt](images/actuator-run.jpg)
+
+Change the port for the actuator to avoid conflicts with your apis URLs in application.propperties as:
+
+```
+management.port: 9001
+```
+
+Then you can access to all the endpoints of the actuator. See more at the [spring actuator official documentation](https://docs.spring.io/spring-boot/docs/current/actuator-api/html/).
